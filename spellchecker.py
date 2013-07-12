@@ -20,7 +20,7 @@ is a wrapper around one or more of your system spell checkers like ispell,
 aspell or myspell. Enchant is installed by default on common Linux
 distributions or available from package managers. Binary installers for Mac and
 Windows are available from the Enchant website.
-Then, I installed pyenchant with a simple::
+I installed pyenchant with a simple::
 
     pip install pyenchant
 
@@ -31,7 +31,7 @@ Oh, one more thing: Because I type a lot of raw LaTeX in my notebooks (see my
 other post on ``ipynb2article.py``) as opposed to real markdown that resembles
 English much better I define a custom filter function that
 makes sure that strings which look like LaTeX commands will not be spell checked
-(since very few LaTeX command are valid English words that would give a lot of 
+(since very few LaTeX command are valid English words so that would give a lot of 
 apparent typos).
 More complicated filters that avoid spell checking within equations or
 commands like ``\label{XXX}`` or ``\cite{}`` are possible (they would be called
@@ -41,12 +41,12 @@ for this code if you want to see if I have an improved version.
 
 How to use this script
 ----------------------
-Close down the notebook you want to spell check in IPython, then simply do on
+Close down the notebook you want to spell check in IPython, then simply type on
 the command line::
 
     > python spellchecker.py filein.ipynb fileout.ipynb
 
-Open the new file in IPython, run all cells again an keep working.
+Open the new file in IPython, run all cells again and keep working.
 
 filein and fileout can be the same filename (in this case the old file will get
 overwritten with the spelling corrected version), but I recommend to keep a copy
