@@ -24,6 +24,8 @@ I installed pyenchant with a simple::
 
     pip install pyenchant
 
+(Pyenchant lives on `<https://github.com/rfk/pyenchant>`_ if you want to read
+the source.)
 With this, the code for the spell checker is barely a dozen lines long (see
 below).
 
