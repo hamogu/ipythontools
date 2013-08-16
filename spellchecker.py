@@ -56,6 +56,7 @@ just in case something gets screwed up.
 '''
 import re
 import json
+import sys
 
 import enchant
 import enchant.tokenize
