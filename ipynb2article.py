@@ -92,8 +92,8 @@ The code is written around these design ideas:
 To implement this I wrote a converter for each cell type. 
 ``LiteralSourceConverter`` just takes the literal string value (it also adds 
 a line break at the end of the  cell) and puts it into the LaTeX file 
-(use for for markdown and raw text cells), 
-``MarkedCodeOutputConverter`` check if a code cell has a specific string in 
+(use for markdown and raw text cells), 
+``MarkedCodeOutputConverter`` checks if a code cell has a specific string in 
 it and if so, it copies the output of this cell, and ``LatexHeadingConverter``
 looks for the level of the heading and turns that into LaTeX (it also adds
 as label like "\label{sect:title}").
@@ -104,7 +104,7 @@ import re
 import sys
 import getopt
 
-def isstartmarker(cell, start):
+def ismarkercell(cell, start):
     if 'source' in cell.keys():
         return cell['source'] == [start]
     elif 'input' in cell.keys():
@@ -176,7 +176,22 @@ class NotebookConverter(object):
                       'markdown': LiteralSourceConverter(),
                       'raw': LiteralSourceConverter()
                       }
-    def convert(self, infile, outfile, start = 0, file_before=None, file_after=None):
+
+    def find_cell(self, cells, marker, skip = 0):
+        '''return number of cell that's specified either by number of by content'''
+        if isinstance(marker, basestring):
+            for i, c in enumerate(cells):
+                if ismarkercell(cells[i], marker):
+                    return i + skip
+            raise ValueError('cell {0} not found in notebook.')
+        else:
+            try:
+                return int(marker)
+            except:
+                raise ValueError('Cells need to be specified with integer number or content string')
+
+
+    def convert(self, infile, outfile, start=0, stop=100000000, file_before=None, file_after=None):
         '''Convert IPython notebook to LaTeX file
 
         Parameters
@@ -189,6 +204,12 @@ class NotebookConverter(object):
             If this is a number, skip that many cells starting from the top;
             if it is a string, skip cells until a cell has *exactly* the 
             content that ``start`` has.
+        stop : int or string
+            If this is a number, ignore anything after that cells
+            (``stop=5`` means the fifth cell from the top, not the cell with number
+            ``[5]`` in the ipython notebook)
+            if it is a string, skip cells after the cell that has *exactly* the 
+            content that ``stop`` has.
         file_before : string
         file_after: string
             String with filename. These files are copied above and below
@@ -201,13 +222,13 @@ class NotebookConverter(object):
             ipynb = json.load(f)
 
         cells = ipynb['worksheets'][0]['cells']
-        if isinstance(start, basestring):
-            while not isstartmarker(cells[0], start):
-                discard = cells.pop(0)
-            discard = cells.pop(0) # pop the marker cell
-        else:
-            for i in range(start):
-                discard = cells.pop(0)
+        start = self.find_cell(cells, start, skip=1)
+        stop = self.find_cell(cells, stop)
+        if stop > len(cells):
+            stop = len(cells)
+        if start > stop:
+            raise Exception('Start cell found after end cell')
+        cells = cells[start:stop]
         
         with open(outfile, 'w') as out:
             print 'Writing ', outfile
