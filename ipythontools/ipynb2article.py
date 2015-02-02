@@ -121,7 +121,11 @@ class LiteralSourceConverter(object):
     '''This converter return the literal ``source`` entry of a cell.'''
     def __call__(self, cell):
         text = cell['source']
-        text[-1] +='\n'
+        
+        if len(text) > 0:
+            text[-1] +='\n'
+        else:
+            return '\n'
         return text
 
 class MarkedCodeOutputConverter(object):
