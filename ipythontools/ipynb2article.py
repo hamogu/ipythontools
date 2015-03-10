@@ -239,15 +239,26 @@ class NotebookConverter(object):
             if file_before is not None:
                 with open(file_before, 'r') as f:
                     for line in f:
-                        out.write(line)
+                        try:
+                            out.write(line)
+                        except UnicodeEncodeError:
+                            raise ValueError(line)
+         
             for cell in cells:
                 lines = self.cellconverters[cell['cell_type']](cell)
-                for line in lines:
-                    out.write(line)
+                for line_num,line in enumerate(lines):
+                    try:
+                        out.write(line)
+                    except UnicodeEncodeError:
+                        raise ValueError(line)
+                    
             if file_after is not None:
                 with open(file_after, 'r') as f:
                     for line in f:
-                        out.write(line)
+                        try:
+                            out.write(line)
+                        except UnicodeEncodeError:
+                            raise ValueError(line)
          
         
 if __name__ == '__main__':
