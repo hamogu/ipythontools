@@ -1,5 +1,5 @@
 import os
-from distutils.core import setup
+from setuptools import setup, find_packages
 
 # Utility function to read the README file.
 # Used for the long_description.  It's nice, because now 1) we have a top level
@@ -10,15 +10,23 @@ def read(fname):
 
 setup(
     name = "ipythontools",
-    version = "0.0.1",
+    version = "0.1.0",
     author = "Hans Moritz Gunther",
-    author_email = "",
+    author_email = "moritz.guenther@gmx.de",
     description = ("ipynb to latex converter"),
     keywords = "ipython latex notebok",
-    url = "https://github.com/douglase/ipythontools",
-    packages=['ipythontools'],
+    url = "https://github.com/hamogu/ipythontools",
+    packages = find_packages(),
+    requires = ['pyenchant'],
     long_description=read('README.md'),
+    license = 'MIT',
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Topic :: Utilities"  ],
+    entry_points={
+        'console_scripts': [
+            'ipython2article = ipythontools.ipynb2article:ipynb2article',
+            'ipynbspellcheck = ipythontools.spellchecker:ipynbspellchecker',
+            ]
+        }
 )
