@@ -143,7 +143,13 @@ class MarkedCodeOutputConverter(object):
         self.marker = marker
     def __call__(self, cell):
         text = []
-        if (self.marker in cell['input']) or (self.marker+'\n' in cell['input']):
+        if 'source' in cell:
+            # Newer version of notebook
+            source = cell['source']
+        else:
+            # Older version of Notebook
+            source = cell['input']
+        if (self.marker in source) or (self.marker+'\n' in source):
             for out in cell['outputs']:
                 if 'text' in out:
                     text.extend(out['text'])
@@ -153,15 +159,14 @@ class MarkedCodeOutputConverter(object):
         return text
 
 class LatexHeadingConverter(object):
-    '''Convert headings in notebook to appropriate level in LaTeX'''
-    def __init__(self, latexlevels=['chapter','section','subsection', 'subsubsection', 'paragraph', 'subparagraph']):
-        '''Convert headings in notebook to appropriate level in LaTeX
+    '''Convert headings in notebook to appropriate level in LaTeX
 
-        Parameters
-        ----------
-        latexlevels : list of 6 strings
-            Latex equivalents for 'Heading 1', 'Heading 2' etc.
-        '''
+    Parameters
+    ----------
+    latexlevels : list of 6 strings
+        Latex equivalents for 'Heading 1', 'Heading 2' etc.
+    '''
+    def __init__(self, latexlevels=['chapter','section','subsection', 'subsubsection', 'paragraph', 'subparagraph']):
         self.latexlevels = latexlevels
     def __call__(self, cell):
         # Just to be careful for multi-line headings
@@ -172,11 +177,63 @@ class LatexHeadingConverter(object):
         line2 = '\\label{{sect:{0}}}\n'.format(cleantitle.lower())
         return ['\n','\n', line1, line2, '\n']
 
+class MinimalMarkdownConverter(object):
+    r'''Parse minimal subset of markdown to LaTeX.
+
+    This parses the following markdown features and convertes them to LaTeX:
+
+    - Headings specificed with #, ##, ###, ... in the beginning of the line.
+      (They will be converted to section, subsection, ... and a `\label{sect:title}`
+      will be added where title is the section title in lower case with all
+      white space removed.)
+
+
+    All other text is copied verbatim to the output, so use LaTeX notation for
+    everything else.
+
+    Parameters
+    ----------
+    latexlevels : list of 6 strings
+        Latex equivalents for 'Heading 1', 'Heading 2' etc.
+    '''
+    def __init__(self, latexlevels=['chapter','section','subsection', 'subsubsection', 'paragraph', 'subparagraph']):
+        self.latexlevels = latexlevels
+
+    def __call__(self, cell):
+        text = cell['source']
+        if len(text) == 0:
+            # empty cell - make new paragraph in text
+            return '\n'
+
+        header = re.compile('\s*#+\s*')
+        out = []
+        for line in text:
+            match = header.match(line)
+            if match:
+                title = line[match.end():]
+                # This happens if title is part of a cell with more lines.
+                # Could probably be done in regular expression, but I prefer being
+                # explicet here to avoid problems with obscure LaTeX constructs within
+                # the title.
+                if title[-1] == '\n':
+                    title = title[:-1]
+                level = line[:match.end()].count('#')
+                line1 = '\\{0}{{{1}}}\n'.format(self.latexlevels[level-1], title)
+                cleantitle = re.sub(r'\W+', '', title)
+                line2 = '\\label{{sect:{0}}}\n'.format(cleantitle.lower())
+                out.extend([line1, line2])
+            else:
+                out.append(line)
+
+        # end with an empty line to start a new paragraph in LaTeX
+        out.extend(['\n', '\n'])
+        return out
+
 class NotebookConverter(object):
     cellconverters = {
                       'code' : MarkedCodeOutputConverter('# output->LaTeX'),
                       'heading': LatexHeadingConverter(),
-                      'markdown': LiteralSourceConverter(),
+                      'markdown': MinimalMarkdownConverter(),
                       'raw': LiteralSourceConverter()
                       }
 
@@ -224,7 +281,12 @@ class NotebookConverter(object):
             print 'Parsing ', infile
             ipynb = json.load(f)
 
-        cells = ipynb['worksheets'][0]['cells']
+        if 'cells' in ipynb:
+            # newer versions of notebook
+            cells = ipynb['cells']
+        else:
+            # notebook format 1
+            cells = ipynb['worksheets'][0]['cells']
         start = self.find_cell(cells, start, skip=1)
         stop = self.find_cell(cells, stop)
         if stop > len(cells):
