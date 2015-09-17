@@ -13,20 +13,24 @@ setup(
     version = "0.1.0",
     author = "Hans Moritz Gunther",
     author_email = "moritz.guenther@gmx.de",
-    description = ("ipynb to latex converter"),
-    keywords = "ipython latex notebok",
+    description = ("Jupyer/IPython notebook to latex converter and spell checker"),
+    keywords = "ipython latex notebok jupyter",
     url = "https://github.com/hamogu/ipythontools",
     packages = find_packages(),
     requires = ['pyenchant'],
     long_description=read('README.md'),
     license = 'MIT',
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 5 - Production/Stable",
+        "Environment :: Console",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: MIT License",
+        "Topic :: Text Processing :: Markup :: LaTeX"
         "Topic :: Utilities"  ],
     entry_points={
         'console_scripts': [
-            'ipython2article = ipythontools.ipynb2article:ipynb2article',
-            'ipynbspellcheck = ipythontools.spellchecker:ipynbspellchecker',
+            'jupyter2article = ipythontools.jupiter2article:jupyter2article',
+            'jupyterspellcheck = ipythontools.spellchecker:jupyterspellchecker',
             ]
         }
 )

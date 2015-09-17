@@ -46,11 +46,11 @@ How to use this script
 Close down the notebook you want to spell check in IPython, then simply type on
 the command line::
 
-    > python spellchecker.py filein.ipynb fileout.ipynb
+    > jupyterspellcheck filein.ipynb fileout.ipynb
 
 Open the new file in IPython, run all cells again and keep working.
 
-filein and fileout can be the same filename (in this case the old file will get
+`filein` and `fileout` can be the same filename (in this case the old file will get
 overwritten with the spelling corrected version), but I recommend to keep a copy
 just in case something gets screwed up.
 '''
@@ -69,8 +69,8 @@ from enchant.checker.CmdLineChecker import CmdLineChecker
 class LatexCommandFilter(enchant.tokenize.EmailFilter):
     _pattern = re.compile(r"\\([^a-zA-Z]|[a-zA-Z]+)")
 
-def ipynbspellchecker():
-    parser = argparse.ArgumentParser(description='''CSpell check a Jupyter/IPython notebook to a LaTeX file.
+def jupyterspellchecker():
+    parser = argparse.ArgumentParser(description='''Spell check a Jupyter/IPython notebook to a LaTeX file.
 
 Raw cells and markdown cells are spell checked in American English.
 ''')

@@ -24,9 +24,9 @@ How to use it
 =============
 As a script
 -----------
-You can use this file form the command line::
+Installing this module places a script in your path, so you can do:
 
-  > python ipynb2article.py myanalysis.ipynb myanalysis.tex
+  > jupyter2article myanalysis.ipynb myanalysis.tex
 
 In this case it's run with my set of design choices (see below).
 
@@ -62,9 +62,7 @@ The code is written around these design ideas:
 - Be able to ignore certain parts of the notebook (e.g. introductory comments
   in the first few cells).
 - Convert headings to section / subsection etc.
-  I generally use "Heading 2" for section, "Heading 3" for subsections etc.
-  In the notebook, just press "Ctrl+m 2" to format a cell as "Heading 2"
-  or select with the mouse from the drop-down menu.
+  I generally level 2 such as "## Heading" for section, "### Heading" for subsections etc.
 - Copy text in "markdown" and "raw text" cells. To simplify, I just write
   real LaTeX code in those cells. All equations will be rendered correctly
   in the notebook file for me and my co-authors to see.
@@ -78,7 +76,7 @@ The code is written around these design ideas:
 
     fig.savefig('/path/to/my/article/XXX.eps')
 
-  because ApJ requires me to submit eps figures as separate files anyway.
+  because ApJ requires me to submit figures as separate files anyway.
 - Just type figure captions into markdown cells.
 - No conversion of code cells. Who wants code in an ApJ paper?
 - Occasionally, I want to have the output of a computation (e.g. a table
@@ -320,7 +318,7 @@ class NotebookConverter(object):
                         except UnicodeEncodeError:
                             raise ValueError(line)
 
-def ipynb2article():
+def jupiter2article():
 
     parser = argparse.ArgumentParser(description='''Convert a Jupyter/IPython notebook to a LaTeX file.
 
