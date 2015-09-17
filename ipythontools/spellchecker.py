@@ -57,6 +57,9 @@ just in case something gets screwed up.
 import re
 import json
 import sys
+import argparse
+
+from __future__ import print_function
 
 import enchant
 import enchant.tokenize
@@ -67,23 +70,38 @@ class LatexCommandFilter(enchant.tokenize.EmailFilter):
     _pattern = re.compile(r"\\([^a-zA-Z]|[a-zA-Z]+)")
 
 def ipynbspellchecker():
+    parser = argparse.ArgumentParser(description='''CSpell check a Jupyter/IPython notebook to a LaTeX file.
+
+Raw cells and markdown cells are spell checked in American English.
+''')
+    parser.add_argument('infile', help='path and filename of the input notebook file.')
+    parser.add_argument('outfile', help='path and filename of the output file.')
+    args = parser.parse_args()
+
     chkr = enchant.checker.SpellChecker("en_US", filters=[LatexCommandFilter])
     cmdln = CmdLineChecker()
     cmdln.set_checker(chkr)
 
 
-    with open(sys.argv[1], 'r') as f:
-        print 'Parsing ', sys.argv[1]
+    with open(args.infile, 'r') as f:
+        print('Parsing ', args.infile)
         ipynb = json.load(f)
 
-    for cell in ipynb['worksheets'][0]['cells']:
+    if 'cells' in ipynb:
+        # newer versions of notebook
+        cells = ipynb['cells']
+    else:
+        # notebook format 1
+        cells = ipynb['worksheets'][0]['cells']
+
+    for cell in cells:
         if cell['cell_type'] in ['markdown', 'raw', 'heading']:
             for i, line in enumerate(cell['source']):
                 chkr.set_text(line)
                 cmdln.run()
                 cell['source'][i] = chkr.get_text()
 
-    with open(sys.argv[2], 'w') as f:
-        print 'Writing ', sys.argv[2]
+    with open(args.outfile, 'w') as f:
+        print('Writing ', args.outfile)
         json.dump(ipynb, f)
-        sys.exit()
+    sys.exit()

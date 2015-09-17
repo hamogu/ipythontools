@@ -99,9 +99,8 @@ as label like "\label{sect:title}").
 '''
 import json
 import re
-
 import sys
-import getopt
+import argparse
 
 def ismarkercell(cell, start):
     if 'source' in cell.keys():
@@ -252,7 +251,7 @@ class NotebookConverter(object):
 
 
     def convert(self, infile, outfile, start=0, stop=100000000, file_before=None, file_after=None):
-        '''Convert IPython notebook to LaTeX file
+        '''Convert IPython notebook to LaTeX file.
 
         Parameters
         ----------
@@ -322,18 +321,30 @@ class NotebookConverter(object):
                             raise ValueError(line)
 
 def ipynb2article():
+
+    parser = argparse.ArgumentParser(description='''Convert a Jupyter/IPython notebook to a LaTeX file.
+
+Raw cells and markdown cells are copied verbatim. Code cells are ignored, unless they contain the string `# output->LaTeX`. In this case their output is copied verbatim; this is useful to generate some LaTeX automatically, e.g. a table.
+Additionally, headings are converted to LaTeX chapter, section, subsection etc. .
+''')
+    parser.add_argument('infile', help='path and filename of the input notebook file.')
+    parser.add_argument('outfile', help='path and filename of the output LaTeX file.')
+    parser.add_argument('--start', default=0,
+                        help='''int or string.
+int: Cells before cell `start` are ignored.
+string: Cells before the first cell with exactly this content are ignored.''')
+    parser.add_argument('--stop', default=1e5,
+                        help='''int or string.
+int: Cells after cell `stop` are ignored.
+string: Cells after the first cell with exactly this content are ignored.''')
+    parser.add_argument('--file_before',
+                        help='Content of this file will be pasted before the notebook conversion. This can be used to staore e.g. LaTeX headers in a separate file.')
+    parser.add_argument('--file_after',
+                        help='Content of this file will be pasted at the end.')
+    args = parser.parse_args()
+
     converter = NotebookConverter()
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "h", ["help"])
-    except getopt.GetoptError:
-        print converter.convert.__doc__
-        sys.exit(2)
-
-    for opt, arg in opts:
-        if opt in ("-h", "--help"):
-            print converter.convert.__doc__
-            sys.exit()
-
-    print args
-    converter.convert(*args)
+    converter.convert(infile=args.infile, outfile=args.outfile,
+                      start=args.start, stop=args.stop,
+                      file_before=args.file_before, file_after=args.file_after)
     sys.exit()
