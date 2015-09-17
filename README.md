@@ -43,7 +43,7 @@ Turn a notebook into a LaTeX file that I can submit to the journal.
 
 Installing this module places a script in your path, so you can do:
 
-  > jupyter2article myanalysis.ipynb myanalysis.tex
+    jupyter2article myanalysis.ipynb myanalysis.tex
 
 In this case it's run with my set of design choices (see below).
 
@@ -71,8 +71,7 @@ However, I do not use this option any longer, because that means I would have
 multiple input files. If I put all those LaTeX headers into the notebook as
 well, I only have a single file.
 
-Design
-======
+**Design**
 
 The code is written around these design ideas:
 
@@ -91,7 +90,7 @@ The code is written around these design ideas:
   (1) I only need to know LaTeX and (2) it works flawlessly when converted.
 - No figure conversion. Instead, in the notebook itself I issue:
 
-    fig.savefig('/path/to/my/article/XXX.eps')
+      > fig.savefig('/path/to/my/article/XXX.eps')
 
   because ApJ requires me to submit figures as separate files anyway.
 - Just type figure captions into markdown cells.
@@ -145,7 +144,7 @@ for this code if you want to see if I have an improved version.
 Close down the notebook you want to spell check in IPython, then simply type on
 the command line:
 
-    > jupyterspellcheck filein.ipynb fileout.ipynb
+    jupyterspellcheck filein.ipynb fileout.ipynb
 
 Open the new file in IPython, run all cells again and keep working.
 
