@@ -54,12 +54,12 @@ Open the new file in IPython, run all cells again and keep working.
 overwritten with the spelling corrected version), but I recommend to keep a copy
 just in case something gets screwed up.
 '''
+from __future__ import print_function
+
 import re
 import json
 import sys
 import argparse
-
-from __future__ import print_function
 
 import enchant
 import enchant.tokenize
