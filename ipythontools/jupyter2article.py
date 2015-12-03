@@ -318,7 +318,7 @@ class NotebookConverter(object):
                         except UnicodeEncodeError:
                             raise ValueError(line)
 
-def jupiter2article():
+def jupyter2article():
 
     parser = argparse.ArgumentParser(description='''Convert a Jupyter/IPython notebook to a LaTeX file.
 

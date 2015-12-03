@@ -29,7 +29,7 @@ setup(
         "Topic :: Utilities"  ],
     entry_points={
         'console_scripts': [
-            'jupyter2article = ipythontools.jupiter2article:jupyter2article',
+            'jupyter2article = ipythontools.jupyter2article:jupyter2article',
             'jupyterspellcheck = ipythontools.spellchecker:jupyterspellchecker',
             ]
         }
