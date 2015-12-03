@@ -100,18 +100,28 @@ import re
 import sys
 import argparse
 
+
 def ismarkercell(cell, start):
+    '''Compare the first line of cell content with string "start".'''
     if 'source' in cell.keys():
-        return cell['source'] == [start]
+        # Marker cell will often be markdown cells starting with `#` characters
+        # because they are headings.
+        # Strip thosecharacters and compare the text in the first line only.
+        if ('cell_type' in cell.keys()) and (cell['cell_type'] == 'markdown'):
+            return cell['source'][0].lstrip('# ') == start.lstrip('# ')
+        else:
+            return cell['source'][0] == start
     elif 'input' in cell.keys():
-        return cell['input'] == [start]
+        return cell['input'][0] == start
     else:
         raise ValueError('Type of cell not recognized.')
+
 
 class IgnoreConverter(object):
     '''Use this converter for cell types that should be ignored'''
     def __call__(self, cell):
         return []
+
 
 class LiteralSourceConverter(object):
     '''This converter return the literal ``source`` entry of a cell.'''
@@ -123,6 +133,7 @@ class LiteralSourceConverter(object):
         else:
             return '\n'
         return text
+
 
 class MarkedCodeOutputConverter(object):
     '''Add output of code cells that have a specific string in the code cell'''
@@ -138,6 +149,7 @@ class MarkedCodeOutputConverter(object):
             output I want.
         '''
         self.marker = marker
+
     def __call__(self, cell):
         text = []
         if 'source' in cell:
@@ -146,14 +158,15 @@ class MarkedCodeOutputConverter(object):
         else:
             # Older version of Notebook
             source = cell['input']
-        if (self.marker in source) or (self.marker+'\n' in source):
+        if (self.marker in source) or (self.marker + '\n' in source):
             for out in cell['outputs']:
                 if 'text' in out:
                     text.extend(out['text'])
 
         if len(text) > 0:
-            text[-1] +='\n'
+            text[-1] += '\n'
         return text
+
 
 class LatexHeadingConverter(object):
     '''Convert headings in notebook to appropriate level in LaTeX
@@ -163,16 +176,18 @@ class LatexHeadingConverter(object):
     latexlevels : list of 6 strings
         Latex equivalents for 'Heading 1', 'Heading 2' etc.
     '''
-    def __init__(self, latexlevels=['chapter','section','subsection', 'subsubsection', 'paragraph', 'subparagraph']):
+    def __init__(self, latexlevels=['chapter', 'section', 'subsection', 'subsubsection', 'paragraph', 'subparagraph']):
         self.latexlevels = latexlevels
+
     def __call__(self, cell):
         # Just to be careful for multi-line headings
         title = ''.join(cell['source'])
-        line1 = '\\{0}{{{1}}}\n'.format(self.latexlevels[cell['level']-1],
+        line1 = '\\{0}{{{1}}}\n'.format(self.latexlevels[cell['level'] - 1],
                                       title)
         cleantitle = re.sub(r'\W+', '', title)
         line2 = '\\label{{sect:{0}}}\n'.format(cleantitle.lower())
-        return ['\n','\n', line1, line2, '\n']
+        return ['\n', '\n', line1, line2, '\n']
+
 
 class MinimalMarkdownConverter(object):
     r'''Parse minimal subset of markdown to LaTeX.
@@ -193,7 +208,7 @@ class MinimalMarkdownConverter(object):
     latexlevels : list of 6 strings
         Latex equivalents for 'Heading 1', 'Heading 2' etc.
     '''
-    def __init__(self, latexlevels=['chapter','section','subsection', 'subsubsection', 'paragraph', 'subparagraph']):
+    def __init__(self, latexlevels=['chapter', 'section', 'subsection', 'subsubsection', 'paragraph', 'subparagraph']):
         self.latexlevels = latexlevels
 
     def __call__(self, cell):
@@ -210,12 +225,12 @@ class MinimalMarkdownConverter(object):
                 title = line[match.end():]
                 # This happens if title is part of a cell with more lines.
                 # Could probably be done in regular expression, but I prefer being
-                # explicet here to avoid problems with obscure LaTeX constructs within
+                # explicit here to avoid problems with obscure LaTeX constructs within
                 # the title.
                 if title[-1] == '\n':
                     title = title[:-1]
                 level = line[:match.end()].count('#')
-                line1 = '\\{0}{{{1}}}\n'.format(self.latexlevels[level-1], title)
+                line1 = '\\{0}{{{1}}}\n'.format(self.latexlevels[level - 1], title)
                 cleantitle = re.sub(r'\W+', '', title)
                 line2 = '\\label{{sect:{0}}}\n'.format(cleantitle.lower())
                 out.extend([line1, line2])
@@ -226,6 +241,7 @@ class MinimalMarkdownConverter(object):
         out.extend(['\n', '\n'])
         return out
 
+
 class NotebookConverter(object):
     cellconverters = {
                       'code' : MarkedCodeOutputConverter('# output->LaTeX'),
@@ -234,7 +250,7 @@ class NotebookConverter(object):
                       'raw': LiteralSourceConverter()
                       }
 
-    def find_cell(self, cells, marker, skip = 0):
+    def find_cell(self, cells, marker, skip=0):
         '''return number of cell that's specified either by number of by content'''
         if isinstance(marker, basestring):
             for i, c in enumerate(cells):
@@ -246,7 +262,6 @@ class NotebookConverter(object):
                 return int(marker)
             except:
                 raise ValueError('Cells need to be specified with integer number or content string')
-
 
     def convert(self, infile, outfile, start=0, stop=100000000, file_before=None, file_after=None):
         '''Convert IPython notebook to LaTeX file.
@@ -304,7 +319,7 @@ class NotebookConverter(object):
 
             for cell in cells:
                 lines = self.cellconverters[cell['cell_type']](cell)
-                for line_num,line in enumerate(lines):
+                for line_num, line in enumerate(lines):
                     try:
                         out.write(line)
                     except UnicodeEncodeError:
@@ -317,6 +332,7 @@ class NotebookConverter(object):
                             out.write(line)
                         except UnicodeEncodeError:
                             raise ValueError(line)
+
 
 def jupyter2article():
 
