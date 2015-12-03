@@ -240,7 +240,7 @@ class NotebookConverter(object):
             for i, c in enumerate(cells):
                 if ismarkercell(cells[i], marker):
                     return i + skip
-            raise ValueError('cell {0} not found in notebook.')
+            raise ValueError('cell "{0}" not found in notebook.'.format(marker))
         else:
             try:
                 return int(marker)
