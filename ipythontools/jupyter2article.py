@@ -1,4 +1,4 @@
-'''Very simple converter from an IPython notebook to e.g. an ApJ or A&A article
+r'''Very simple converter from an IPython notebook to e.g. an ApJ or A&A article
 
 When I first encountered the IPython notebook, I thought this was a solution
 looking for a problem. However, I have since been converted!
@@ -252,7 +252,7 @@ class NotebookConverter(object):
 
     def find_cell(self, cells, marker, skip=0):
         '''return number of cell that's specified either by number of by content'''
-        if isinstance(marker, basestring):
+        if isinstance(marker, str):
             for i, c in enumerate(cells):
                 if ismarkercell(cells[i], marker):
                     return i + skip
@@ -290,7 +290,7 @@ class NotebookConverter(object):
             notebook.
         '''
         with open(infile, 'r') as f:
-            print 'Parsing ', infile
+            print('Parsing ', infile)
             ipynb = json.load(f)
 
         if 'cells' in ipynb:
@@ -308,7 +308,7 @@ class NotebookConverter(object):
         cells = cells[start:stop]
 
         with open(outfile, 'w') as out:
-            print 'Writing ', outfile
+            print('Writing ', outfile)
             if file_before is not None:
                 with open(file_before, 'r') as f:
                     for line in f:
@@ -352,7 +352,7 @@ string: Cells before the first cell with exactly this content are ignored.''')
 int: Cells after cell `stop` are ignored.
 string: Cells after the first cell with exactly this content are ignored.''')
     parser.add_argument('--file_before',
-                        help='Content of this file will be pasted before the notebook conversion. This can be used to staore e.g. LaTeX headers in a separate file.')
+                        help='Content of this file will be pasted before the notebook conversion. This can be used to store e.g. LaTeX headers in a separate file.')
     parser.add_argument('--file_after',
                         help='Content of this file will be pasted at the end.')
     args = parser.parse_args()
@@ -362,3 +362,6 @@ string: Cells after the first cell with exactly this content are ignored.''')
                       start=args.start, stop=args.stop,
                       file_before=args.file_before, file_after=args.file_after)
     sys.exit()
+
+if __name__ == '__main__':
+    jupyter2article()
